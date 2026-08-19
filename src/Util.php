@@ -469,7 +469,7 @@ class Util
      * @param int                                                    $currentPage  当前页码
      * @param int                                                    $perPage      每页显示数
      * @param string|callable|null                                   $urlPattern   URL 模式或闭包
-     * @param array                                                  $options      额外选项（prev_text/next_text/show_count/class/route/route_param）
+     * @param array                                                  $options      额外选项（prev_text/next_text/show_count/class/route/route_param/indent）
      * @return string
      */
     public static function pagination($total, $currentPage = 1, $perPage = 15, $urlPattern = null, $options = [])
@@ -488,7 +488,19 @@ class Util
             'class'        => 'pagination',
             'route'        => null,
             'route_param'  => 'page',
+            // 缩进设置：true=默认两空格；字符串=自定义缩进；false/空=压缩单行
+            'indent'       => true,
         ], $options);
+
+        // 解析缩进：true 用默认两空格，字符串直接用，其他视为无缩进
+        $indentUnit = '';
+        if ($options['indent'] === true) {
+            $indentUnit = '    '; // 4 空格
+        } elseif (is_string($options['indent']) && $options['indent'] !== '') {
+            $indentUnit = $options['indent'];
+        }
+        $hasIndent = $indentUnit !== '';
+        $eol = $hasIndent ? PHP_EOL : '';
 
         // URL 生成器：优先使用闭包，其次命名路由，最后字符串占位符
         $buildUrl = function ($page) use ($urlPattern, $options) {
@@ -505,13 +517,18 @@ class Util
             return str_replace(':page', $page, $pattern);
         };
 
+        // 单个 <li> 行的生成器：前置换行+缩进，尾部不留换行（避免行间空行）
+        $li = function ($content) use ($indentUnit, $eol) {
+            return $eol . $indentUnit . $content;
+        };
+
         $html = '<ul class="' . e($options['class']) . '">';
 
         // 上一页
         if ($currentPage > 1) {
-            $html .= '<li><a href="' . e($buildUrl($currentPage - 1)) . '">' . $options['prev_text'] . '</a></li>';
+            $html .= $li('<li><a href="' . e($buildUrl($currentPage - 1)) . '">' . $options['prev_text'] . '</a></li>');
         } else {
-            $html .= '<li class="disabled"><span>' . $options['prev_text'] . '</span></li>';
+            $html .= $li('<li class="disabled"><span>' . $options['prev_text'] . '</span></li>');
         }
 
         // 计算页码显示区间
@@ -522,37 +539,38 @@ class Util
 
         // 首页与省略号
         if ($start > 1) {
-            $html .= '<li><a href="' . e($buildUrl(1)) . '">1</a></li>';
+            $html .= $li('<li><a href="' . e($buildUrl(1)) . '">1</a></li>');
             if ($start > 2) {
-                $html .= '<li class="ellipsis"><span>...</span></li>';
+                $html .= $li('<li class="ellipsis"><span>...</span></li>');
             }
         }
 
         // 页码
         for ($i = $start; $i <= $end; $i++) {
             if ($i == $currentPage) {
-                $html .= '<li class="active"><span>' . $i . '</span></li>';
+                $html .= $li('<li class="active"><span>' . $i . '</span></li>');
             } else {
-                $html .= '<li><a href="' . e($buildUrl($i)) . '">' . $i . '</a></li>';
+                $html .= $li('<li><a href="' . e($buildUrl($i)) . '">' . $i . '</a></li>');
             }
         }
 
         // 末页与省略号
         if ($end < $totalPages) {
             if ($end < $totalPages - 1) {
-                $html .= '<li class="ellipsis"><span>...</span></li>';
+                $html .= $li('<li class="ellipsis"><span>...</span></li>');
             }
-            $html .= '<li><a href="' . e($buildUrl($totalPages)) . '">' . $totalPages . '</a></li>';
+            $html .= $li('<li><a href="' . e($buildUrl($totalPages)) . '">' . $totalPages . '</a></li>');
         }
 
         // 下一页
         if ($currentPage < $totalPages) {
-            $html .= '<li><a href="' . e($buildUrl($currentPage + 1)) . '">' . $options['next_text'] . '</a></li>';
+            $html .= $li('<li><a href="' . e($buildUrl($currentPage + 1)) . '">' . $options['next_text'] . '</a></li>');
         } else {
-            $html .= '<li class="disabled"><span>' . $options['next_text'] . '</span></li>';
+            $html .= $li('<li class="disabled"><span>' . $options['next_text'] . '</span></li>');
         }
 
-        $html .= '</ul>';
+        // 结束标签前补换行（保持缩进开启时格式整齐）
+        $html .= $eol . '</ul>';
 
         return $html;
     }
