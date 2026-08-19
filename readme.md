@@ -29,7 +29,3 @@ composer require simpmelie/helper-utils
 ```sh
 php artisan vendor:publish --provider="Simpmelie\Utils\UtilsServiceProvider"
 ```
-
-## 版权信息
-
-本软件基于 MIT 许可证发布，详见 [LICENSE](LICENSE) 文件。
