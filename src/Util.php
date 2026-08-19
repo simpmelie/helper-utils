@@ -16,6 +16,16 @@ use Simpmelie\Utils\JavaScript\Transformer;
 class Util
 {
     /**
+     * SEO Meta 标签存储
+     *
+     * @var array
+     */
+    protected static $seoMeta = [
+        'title' => '',
+        'keywords' => '',
+        'description' => '',
+    ];
+    /**
     * 过滤标签，输出没有html的干净的文本
     *
     * @param string $text 文本内容
@@ -359,6 +369,192 @@ class Util
         $transformer->put($var);
 
         return $transformer;
+    }
+
+    /**
+     * 设置 SEO Meta 标签 (Title、Keywords、Description)
+     *
+     * @param string|null $title       页面标题
+     * @param string|null $keywords    关键字
+     * @param string|null $description 描述
+     * @return void
+     */
+    public static function setSeoMeta($title = null, $keywords = null, $description = null)
+    {
+        if (!is_null($title)) static::$seoMeta['title'] = $title;
+        if (!is_null($keywords)) static::$seoMeta['keywords'] = $keywords;
+        if (!is_null($description)) static::$seoMeta['description'] = $description;
+    }
+
+    /**
+     * 获取页面 Title，可附加站点后缀
+     *
+     * @param string $default   未设置时的默认标题
+     * @param string $suffix     站点后缀（站点名）
+     * @param string $separator  标题与后缀的分隔符
+     * @return string
+     */
+    public static function seoTitle($default = '', $suffix = '', $separator = ' - ')
+    {
+        $title = static::$seoMeta['title'] !== '' ? static::$seoMeta['title'] : $default;
+
+        if ($suffix !== '') {
+            $title = $title !== '' ? $title . $separator . $suffix : $suffix;
+        }
+
+        return $title;
+    }
+
+    /**
+     * 获取页面 Keywords
+     *
+     * @param string $default 未设置时的默认关键字
+     * @return string
+     */
+    public static function seoKeywords($default = '')
+    {
+        return static::$seoMeta['keywords'] !== '' ? static::$seoMeta['keywords'] : $default;
+    }
+
+    /**
+     * 获取页面 Description
+     *
+     * @param string $default 未设置时的默认描述
+     * @return string
+     */
+    public static function seoDescription($default = '')
+    {
+        return static::$seoMeta['description'] !== '' ? static::$seoMeta['description'] : $default;
+    }
+
+    /**
+     * 输出 SEO Meta 的 HTML 标签（title、keywords、description）
+     *
+     * @param string $titleSuffix    标题后缀（站点名）
+     * @param string $titleSeparator 标题分隔符
+     * @return string
+     */
+    public static function seoMetaHtml($titleSuffix = '', $titleSeparator = ' - ')
+    {
+        $html = '';
+
+        $title = static::seoTitle('', $titleSuffix, $titleSeparator);
+        if ($title !== '') {
+            $html .= '<title>' . e($title) . '</title>' . PHP_EOL;
+        }
+
+        $keywords = static::seoKeywords();
+        if ($keywords !== '') {
+            $html .= '<meta name="keywords" content="' . e($keywords) . '" />' . PHP_EOL;
+        }
+
+        $description = static::seoDescription();
+        if ($description !== '') {
+            $html .= '<meta name="description" content="' . e($description) . '" />' . PHP_EOL;
+        }
+
+        return $html;
+    }
+
+    /**
+     * 生成分页链接 HTML
+     *
+     * URL 生成方式（遵循 Laravel 原生路由，无 .html 后缀）：
+     *   1. $urlPattern 为闭包（推荐）：接收页码，返回 URL 字符串
+     *      例：function ($page) { return route('news.list', ['page' => $page]); }
+     *   2. $urlPattern 为字符串：使用 :page 占位符，例：'/news?page=:page'
+     *   3. options.route 指定命名路由：自动以 page 参数生成 URL
+     *
+     * @param int                                                    $total        总记录数
+     * @param int                                                    $currentPage  当前页码
+     * @param int                                                    $perPage      每页显示数
+     * @param string|callable|null                                   $urlPattern   URL 模式或闭包
+     * @param array                                                  $options      额外选项（prev_text/next_text/show_count/class/route/route_param）
+     * @return string
+     */
+    public static function pagination($total, $currentPage = 1, $perPage = 15, $urlPattern = null, $options = [])
+    {
+        $totalPages = (int) ceil($total / $perPage);
+        if ($totalPages <= 1) {
+            return '';
+        }
+
+        $currentPage = max(1, min((int) $currentPage, $totalPages));
+
+        $options = array_merge([
+            'prev_text'    => '上一页',
+            'next_text'    => '下一页',
+            'show_count'   => 5,
+            'class'        => 'pagination',
+            'route'        => null,
+            'route_param'  => 'page',
+        ], $options);
+
+        // URL 生成器：优先使用闭包，其次命名路由，最后字符串占位符
+        $buildUrl = function ($page) use ($urlPattern, $options) {
+            if (is_callable($urlPattern)) {
+                return call_user_func($urlPattern, $page);
+            }
+
+            if (!empty($options['route'])) {
+                $params = [$options['route_param'] => $page];
+                return route($options['route'], $params);
+            }
+
+            $pattern = is_string($urlPattern) ? $urlPattern : '?page=:page';
+            return str_replace(':page', $page, $pattern);
+        };
+
+        $html = '<ul class="' . e($options['class']) . '">';
+
+        // 上一页
+        if ($currentPage > 1) {
+            $html .= '<li><a href="' . e($buildUrl($currentPage - 1)) . '">' . $options['prev_text'] . '</a></li>';
+        } else {
+            $html .= '<li class="disabled"><span>' . $options['prev_text'] . '</span></li>';
+        }
+
+        // 计算页码显示区间
+        $showCount = (int) $options['show_count'];
+        $start = max(1, $currentPage - (int) floor($showCount / 2));
+        $end = min($totalPages, $start + $showCount - 1);
+        $start = max(1, $end - $showCount + 1);
+
+        // 首页与省略号
+        if ($start > 1) {
+            $html .= '<li><a href="' . e($buildUrl(1)) . '">1</a></li>';
+            if ($start > 2) {
+                $html .= '<li class="ellipsis"><span>...</span></li>';
+            }
+        }
+
+        // 页码
+        for ($i = $start; $i <= $end; $i++) {
+            if ($i == $currentPage) {
+                $html .= '<li class="active"><span>' . $i . '</span></li>';
+            } else {
+                $html .= '<li><a href="' . e($buildUrl($i)) . '">' . $i . '</a></li>';
+            }
+        }
+
+        // 末页与省略号
+        if ($end < $totalPages) {
+            if ($end < $totalPages - 1) {
+                $html .= '<li class="ellipsis"><span>...</span></li>';
+            }
+            $html .= '<li><a href="' . e($buildUrl($totalPages)) . '">' . $totalPages . '</a></li>';
+        }
+
+        // 下一页
+        if ($currentPage < $totalPages) {
+            $html .= '<li><a href="' . e($buildUrl($currentPage + 1)) . '">' . $options['next_text'] . '</a></li>';
+        } else {
+            $html .= '<li class="disabled"><span>' . $options['next_text'] . '</span></li>';
+        }
+
+        $html .= '</ul>';
+
+        return $html;
     }
 
 }

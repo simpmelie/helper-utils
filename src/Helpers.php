@@ -284,7 +284,7 @@ if (!function_exists('jy_encrypt')) {
 if (!function_exists('jy_decrypt')) {
     /**
      * 系统解密方法
-     * 
+     *
      * @param  string  $data 要解密的字符串 （必须是jyEncrypt方法加密的字符串）
      * @param  string  $authKey 加密盐
      * @return string
@@ -292,5 +292,97 @@ if (!function_exists('jy_decrypt')) {
     function jy_decrypt($string)
     {
         return Util::jyDecrypt($string);
+    }
+}
+
+if (!function_exists('set_seo_meta')) {
+    /**
+     * 设置 SEO Meta 标签 (Title、Keywords、Description)
+     *
+     * @param string|null $title       页面标题
+     * @param string|null $keywords    关键字
+     * @param string|null $description 描述
+     * @return void
+     */
+    function set_seo_meta($title = null, $keywords = null, $description = null)
+    {
+        Util::setSeoMeta($title, $keywords, $description);
+    }
+}
+
+if (!function_exists('seo_title')) {
+    /**
+     * 获取页面 Title，可附加站点后缀
+     *
+     * @param string $default   未设置时的默认标题
+     * @param string $suffix     站点后缀（站点名）
+     * @param string $separator  标题与后缀的分隔符
+     * @return string
+     */
+    function seo_title($default = '', $suffix = '', $separator = ' - ')
+    {
+        return Util::seoTitle($default, $suffix, $separator);
+    }
+}
+
+if (!function_exists('seo_keywords')) {
+    /**
+     * 获取页面 Keywords
+     *
+     * @param string $default 未设置时的默认关键字
+     * @return string
+     */
+    function seo_keywords($default = '')
+    {
+        return Util::seoKeywords($default);
+    }
+}
+
+if (!function_exists('seo_description')) {
+    /**
+     * 获取页面 Description
+     *
+     * @param string $default 未设置时的默认描述
+     * @return string
+     */
+    function seo_description($default = '')
+    {
+        return Util::seoDescription($default);
+    }
+}
+
+if (!function_exists('seo_meta_html')) {
+    /**
+     * 输出 SEO Meta 的 HTML 标签（title、keywords、description）
+     *
+     * @param string $titleSuffix    标题后缀（站点名）
+     * @param string $titleSeparator 标题分隔符
+     * @return string
+     */
+    function seo_meta_html($titleSuffix = '', $titleSeparator = ' - ')
+    {
+        return Util::seoMetaHtml($titleSuffix, $titleSeparator);
+    }
+}
+
+if (!function_exists('pagination')) {
+    /**
+     * 生成分页链接 HTML
+     *
+     * URL 生成遵循 Laravel 原生路由（无 .html 后缀），支持三种方式：
+     *   1. $urlPattern 为闭包（推荐）：接收页码，返回 URL 字符串
+     *   2. $urlPattern 为字符串：使用 :page 占位符
+     *   3. options.route 指定命名路由：自动以 page 参数生成 URL
+     *
+     * @param int                  $total        总记录数
+     * @param int                  $currentPage  当前页码
+     * @param int                  $perPage      每页显示数
+     * @param string|callable|null $urlPattern   URL 模式或闭包
+     * @param array                $options      额外选项（prev_text/next_text/show_count/class/route/route_param）
+     * @return string
+     */
+    function pagination($total, $currentPage = 1, $perPage = 15, $urlPattern = null, $options = [])
+    {
+        return Util::pagination($total, $currentPage, $perPage, $urlPattern, $options);
     }
 }
