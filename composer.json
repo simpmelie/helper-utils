@@ -10,7 +10,6 @@
     "helper",
     "active",
     "validator"
-    "Transformers"
     "php"
   ],
   "homepage": "https://github.com/simpmelie/helper-utils",
