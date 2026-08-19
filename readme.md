@@ -11,7 +11,7 @@
 - 自定义验证规则：手机号、中文、字母数字等
 - 工具函数：文本过滤、数字转中文大写、字符串隐藏、高亮、URL 安全编解码、加解密
 - Tag 标签模型与 HasTags Trait
-- 身份证验证
+- 身份证验证，兑奖码核销校验
 
 ## 安装要求
 
@@ -29,7 +29,3 @@ composer require simpmelie/Helper-utils
 ```sh
 php artisan vendor:publish --provider="Simpmelie\Utils\UtilsServiceProvider"
 ```
-
-## 版权信息
-
-本软件基于 MIT 许可证发布，详见 [LICENSE](LICENSE) 文件。
