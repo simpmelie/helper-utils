@@ -1,0 +1,53 @@
+{
+  "name": "simpmelie/helper-utils",
+  "description": "Laravel 13 utility helpers for simpmelie",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+    "Laravel",
+    "Laravel 13",
+    "utils",
+    "helper",
+    "active",
+    "javascript",
+    "validator"
+  ],
+  "homepage": "https://github.com/simpmelie/helper-utils",
+  "authors": [
+    {
+      "name": "simpmelie",
+      "email": "melie647@outlook.com",
+      "homepage": "https://github.com/simpmelie"
+    }
+  ],
+  "require": {
+    "php": "^8.2",
+    "laravel/framework": "^13.0",
+    "symfony/dom-crawler": "^7.0",
+    "spatie/eloquent-sortable": "^4.0",
+    "doctrine/dbal": "^3.0|^4.0",
+    "overtrue/pinyin": "^4.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Simpmelie\\Utils\\": "src/"
+    },
+    "files": [
+      "src/Helpers.php"
+    ]
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Simpmelie\\Utils\\UtilsServiceProvider"
+      ],
+      "aliases": {
+        "Utils": "Simpmelie\\Utils\\Facades\\Utils",
+        "Active": "Simpmelie\\Utils\\Facades\\Active",
+        "Javascript": "Simpmelie\\Utils\\Facades\\Javascript"
+      }
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
