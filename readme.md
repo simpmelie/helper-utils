@@ -21,7 +21,7 @@
 ## 安装
 
 ```sh
-composer require simpmelie/helper-utils
+composer require simpmelie/Helper-utils
 ```
 
 #### 发布配置文件

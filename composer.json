@@ -9,8 +9,9 @@
     "utils",
     "helper",
     "active",
-    "javascript",
     "validator"
+    "Transformers"
+    "php"
   ],
   "homepage": "https://github.com/simpmelie/helper-utils",
   "authors": [

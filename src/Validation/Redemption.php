@@ -12,7 +12,7 @@
 namespace Simpmelie\Utils\Validation;
 
 /**
- * 兑奖核销校验
+ * 兑奖码核销校验
  *
  * 用于兑奖码/核销码的格式校验、有效期校验、状态校验、次数校验
  *
